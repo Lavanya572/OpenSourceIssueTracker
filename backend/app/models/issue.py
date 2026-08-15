@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 
 class Issue(BaseModel):
+    id: int
+    issue_number: int
     title: str
     repository: str
     language: str | None

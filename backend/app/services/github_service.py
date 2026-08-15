@@ -16,6 +16,8 @@ def map_issue(item) -> Issue:
     )
 
     return Issue(
+        id=item["id"],
+        issue_number=item["number"],
         title=item["title"],
         repository=item["repository_url"].replace(
             "https://api.github.com/repos/",
@@ -131,3 +133,40 @@ def search_issues(
         "issues": issues
     }
 
+def get_issue(
+    owner: str,
+    repo: str,
+    issue_number: int
+):
+
+    url = (
+        f"{settings.GITHUB_API}/repos/"
+        f"{owner}/{repo}/issues/{issue_number}"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {settings.GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    response = requests.get(
+        url,
+        headers=headers
+    )
+
+    if response.status_code == 404:
+        return None
+
+    response.raise_for_status()
+
+    item = response.json()
+
+    return {
+        "title": item["title"],
+        "body": item["body"] or "",
+        "labels": [
+            label["name"]
+            for label in item["labels"]
+        ],
+        "language": None
+    }

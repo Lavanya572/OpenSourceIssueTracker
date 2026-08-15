@@ -1,22 +1,47 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+
+from app.services.github_service import get_issue
+from app.services.analyzer_service import analyze_issue
+from app.models.analysis import IssueAnalysisResponse
 
 from app.models.analysis import (
     IssueAnalysisRequest,
     IssueAnalysisResponse
 )
 
-from app.services.analyzer_service import analyze_issue
-
 
 router = APIRouter()
 
 
+
+
 @router.post(
-    "/issues/analyze",
+    "/issues/analyze/{owner}/{repo}/{issue_number}",
     response_model=IssueAnalysisResponse
 )
-def analyze_issue_endpoint(
-    issue: IssueAnalysisRequest
+def analyze_github_issue(
+    owner: str,
+    repo: str,
+    issue_number: int
 ):
 
-    return analyze_issue(issue)
+    issue = get_issue(
+        owner,
+        repo,
+        issue_number
+    )
+
+    if issue is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Issue not found"
+        )
+
+    request = IssueAnalysisRequest(
+        title=issue["title"],
+        body=issue["body"],
+        labels=issue["labels"],
+        language=issue["language"]
+    )
+
+    return analyze_issue(request)
