@@ -31,12 +31,6 @@ def analyze_github_issue(
         issue_number
     )
 
-    if issue is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Issue not found"
-        )
-
     request = IssueAnalysisRequest(
         title=issue["title"],
         body=issue["body"],

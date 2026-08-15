@@ -2,6 +2,7 @@ import requests
 
 from app.config import settings
 from app.models.issue import Issue
+from app.exceptions import GitHubAPIError
 
 
 GITHUB_SEARCH_URL = f"{settings.GITHUB_API}/search/issues"
@@ -108,7 +109,7 @@ def get_repository_language(
         "Accept": "application/vnd.github+json"
     }
 
-    response = requests.get(
+    response = github_get(
         repository_url,
         headers=headers
     )
@@ -130,6 +131,55 @@ def get_repository_language(
 
     return repository_info["language"]
 
+def github_get(url, headers, params=None):
+
+    try:
+
+        response = requests.get(
+            url,
+            headers=headers,
+            params=params,
+            timeout=10
+        )
+
+    except requests.RequestException:
+
+        raise GitHubAPIError(
+            "Unable to connect to GitHub.",
+            503
+        )
+
+    if response.status_code == 401:
+
+        raise GitHubAPIError(
+            "GitHub authentication failed. Check your GitHub token.",
+            401
+        )
+
+    if response.status_code == 403:
+
+        raise GitHubAPIError(
+            "GitHub API rate limit exceeded or access was denied.",
+            429
+        )
+
+    if response.status_code == 404:
+
+        raise GitHubAPIError(
+            "GitHub resource not found.",
+            404
+        )
+
+    if response.status_code >= 500:
+
+        raise GitHubAPIError(
+            "GitHub is currently unavailable.",
+            502
+        )
+
+    response.raise_for_status()
+
+    return response
 
 def search_issues(
     language=None,
@@ -165,7 +215,7 @@ def search_issues(
         "per_page": per_page
     }
 
-    response = requests.get(
+    response = github_get(
         GITHUB_SEARCH_URL,
         headers=headers,
         params=params
@@ -203,13 +253,12 @@ def get_issue(
         "Accept": "application/vnd.github+json"
     }
 
-    response = requests.get(
+    response = github_get(
         url,
         headers=headers
     )
 
-    if response.status_code == 404:
-        return None
+
 
     response.raise_for_status()
 
