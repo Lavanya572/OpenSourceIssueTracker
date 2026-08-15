@@ -37,6 +37,48 @@ ADVANCED_KEYWORDS = {
     "memory management": 4
 }
 
+SKILL_KEYWORDS = {
+    "Python": ["python"],
+    "C++": ["c++", "cpp"],
+    "C": [" c ", "c programming"],
+    "Java": ["java"],
+    "JavaScript": ["javascript", "js"],
+    "TypeScript": ["typescript", "ts"],
+    "React": ["react", "reactjs"],
+    "Node.js": ["node.js", "nodejs", "node"],
+    "FastAPI": ["fastapi"],
+    "Django": ["django"],
+    "Flask": ["flask"],
+    "SQL": ["sql"],
+    "PostgreSQL": ["postgresql", "postgres"],
+    "MySQL": ["mysql"],
+    "MongoDB": ["mongodb", "mongo"],
+    "Docker": ["docker", "container"],
+    "AWS": ["aws", "amazon web services"],
+    "Git": ["git", "github"],
+    "REST API": ["rest api", "restful api", "api"],
+    "HTML": ["html"],
+    "CSS": ["css"],
+}
+
+def detect_skills(text: str) -> list[str]:
+
+    text = text.lower()
+
+    detected_skills = []
+
+    for skill, keywords in SKILL_KEYWORDS.items():
+
+        for keyword in keywords:
+
+            if keyword in text:
+
+                detected_skills.append(skill)
+
+                break
+
+    return detected_skills
+
 
 def analyze_issue(
     issue: IssueAnalysisRequest
@@ -52,6 +94,13 @@ def analyze_issue(
     text = (
         issue.title + " " + issue.body
     ).lower()
+
+    skills = detect_skills(text)
+
+    if issue.language and issue.language not in skills:
+        skills.insert(0, issue.language)
+
+    score = 0
 
     # -----------------------------
     # Label-based scoring
@@ -125,7 +174,7 @@ def analyze_issue(
         difficulty=difficulty,
         score=score,
         confidence=round(confidence, 2),
-        skills=[],
+        skills=skills,
         reason=f"Difficulty score: {score}",
         suggested_approach=[
             "Read the issue description carefully",
