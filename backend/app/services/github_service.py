@@ -77,6 +77,60 @@ def get_repository_info(repository_url):
 
     return repository_info
 
+def get_repository_language(
+    owner: str,
+    repo: str
+):
+
+    repository_url = (
+        f"{settings.GITHUB_API}/repos/"
+        f"{owner}/{repo}"
+    )
+
+    if repository_url in repository_cache:
+
+        print(
+            "Using cached repository:",
+            repository_url
+        )
+
+        return repository_cache[
+            repository_url
+        ]["language"]
+
+    print(
+        "Fetching repository:",
+        repository_url
+    )
+
+    headers = {
+        "Authorization": f"Bearer {settings.GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    response = requests.get(
+        repository_url,
+        headers=headers
+    )
+
+    response.raise_for_status()
+
+    data = response.json()
+
+    repository_info = {
+        "language": data.get("language"),
+        "stars": data.get("stargazers_count", 0),
+        "forks": data.get("forks_count", 0),
+        "open_issues": data.get("open_issues_count", 0)
+    }
+
+    repository_cache[
+        repository_url
+    ] = repository_info
+
+    return repository_info["language"]
+
+
 def search_issues(
     language=None,
     label=None,
@@ -161,6 +215,11 @@ def get_issue(
 
     item = response.json()
 
+    language = get_repository_language(
+        owner,
+        repo
+    )
+
     return {
         "title": item["title"],
         "body": item["body"] or "",
@@ -170,3 +229,4 @@ def get_issue(
         ],
         "language": None
     }
+
