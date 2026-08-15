@@ -181,9 +181,9 @@ def search_issues(
     ]
 
     return {
-        "total_count": data["total_count"],
         "page": page,
         "per_page": per_page,
+        "total": data["total_count"],
         "issues": issues
     }
 

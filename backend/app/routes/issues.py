@@ -2,11 +2,15 @@ from typing import Optional
 from fastapi import APIRouter
 
 from app.services.github_service import search_issues
+from app.models.issue_response import IssueSearchResponse
 
 router = APIRouter()
 
 
-@router.get("/issues")
+@router.get(
+    "/issues",
+    response_model=IssueSearchResponse
+)
 def fetch_issues(
     language: Optional[str] = None,
     label: Optional[str] = None,
