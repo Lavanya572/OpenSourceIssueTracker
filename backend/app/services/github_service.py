@@ -8,12 +8,26 @@ GITHUB_SEARCH_URL = f"{settings.GITHUB_API}/search/issues"
 
 
 def map_issue(item) -> Issue:
+
+    repository_info = get_repository_info(
+        item["repository_url"]
+    )
+    
     return Issue(
         title=item["title"],
         repository=item["repository_url"].replace(
             "https://api.github.com/repos/",
             ""
         ),
+
+        language=repository_info["language"],
+
+        stars=repository_info["stars"],
+
+        forks=repository_info["forks"],
+
+        open_issues=repository_info["open_issues"],
+
         labels=[
             label["name"]
             for label in item["labels"]
@@ -21,6 +35,27 @@ def map_issue(item) -> Issue:
         url=item["html_url"],
         created_at=item["created_at"]
     )
+
+def get_repository_info(repository_url):
+
+    response = requests.get(
+        repository_url,
+        headers={
+            "Authorization": f"Bearer {settings.GITHUB_TOKEN}",
+            "Accept": "application/vnd.github+json"
+        }
+    )
+
+    response.raise_for_status()
+
+    data = response.json()
+
+    return {
+        "language": data["language"],
+        "stars": data["stargazers_count"],
+        "forks": data["forks_count"],
+        "open_issues": data["open_issues_count"]
+    }
 
 def search_issues(
     language=None,

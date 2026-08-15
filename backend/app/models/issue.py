@@ -3,6 +3,10 @@ from pydantic import BaseModel
 class Issue(BaseModel):
     title: str
     repository: str
+    language: str | None
+    stars: int
+    forks: int
+    open_issues: int
     labels: list[str]
     url: str
     created_at: str
