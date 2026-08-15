@@ -22,18 +22,38 @@ def map_issue(item) -> Issue:
         created_at=item["created_at"]
     )
 
-def get_beginner_issues():
+def search_issues(
+    language=None,
+    label=None,
+    state="open",
+    page=1,
+    per_page=10
+):
 
     headers = {
         "Authorization": f"Bearer {settings.GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json"
     }
 
+    query = ["is:issue"]
+
+    if state:
+        query.append(f"is:{state}")
+
+    if language:
+        query.append(f"language:{language}")
+
+    if label:
+        query.append(f'label:"{label}"')
+
+    search_query = " ".join(query)
+
     params = {
-        "q": 'is:issue is:open label:"good first issue"',
+        "q": search_query,
         "sort": "created",
         "order": "desc",
-        "per_page": 10
+        "page": page,
+        "per_page": per_page
     }
 
     response = requests.get(
@@ -46,9 +66,15 @@ def get_beginner_issues():
 
     data = response.json()
 
-    print(response.status_code)
+    issues = [
+        map_issue(item)
+        for item in data["items"]
+    ]
 
-    print(response.json())
+    return {
+        "total_count": data["total_count"],
+        "page": page,
+        "per_page": per_page,
+        "issues": issues
+    }
 
-    issues = [map_issue(item) for item in data["items"]]
-    return issues
