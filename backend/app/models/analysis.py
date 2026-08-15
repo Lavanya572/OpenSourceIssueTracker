@@ -10,6 +10,7 @@ class IssueAnalysisRequest(BaseModel):
 
 class IssueAnalysisResponse(BaseModel):
     difficulty: str
+    score: int
     confidence: float
     skills: list[str]
     reason: str
