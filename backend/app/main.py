@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from app.routes import analyze
+
 from app.routes.issues import router as issue_router
 
 app = FastAPI(
@@ -17,3 +19,5 @@ def home():
 
 
 app.include_router(issue_router)
+
+app.include_router(analyze.router)
