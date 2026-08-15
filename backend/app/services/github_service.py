@@ -6,13 +6,15 @@ from app.models.issue import Issue
 
 GITHUB_SEARCH_URL = f"{settings.GITHUB_API}/search/issues"
 
+repository_cache = {}
+
 
 def map_issue(item) -> Issue:
 
     repository_info = get_repository_info(
         item["repository_url"]
     )
-    
+
     return Issue(
         title=item["title"],
         repository=item["repository_url"].replace(
@@ -38,6 +40,17 @@ def map_issue(item) -> Issue:
 
 def get_repository_info(repository_url):
 
+    # Check cache first
+    if repository_url in repository_cache:
+
+        print("Using cached repository:", repository_url)
+
+
+        return repository_cache[repository_url]
+
+    print("Fetching repository from GitHub:", repository_url)
+
+
     response = requests.get(
         repository_url,
         headers={
@@ -50,12 +63,17 @@ def get_repository_info(repository_url):
 
     data = response.json()
 
-    return {
+    repository_info = {
         "language": data["language"],
         "stars": data["stargazers_count"],
         "forks": data["forks_count"],
         "open_issues": data["open_issues_count"]
     }
+
+    # Store result in cache
+    repository_cache[repository_url] = repository_info
+
+    return repository_info
 
 def search_issues(
     language=None,
