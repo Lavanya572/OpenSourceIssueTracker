@@ -1,10 +1,7 @@
-from fastapi import FastAPI
-
+from fastapi import FastAPI, Request
 from app.routes import analyze
 
 from app.routes.issues import router as issue_router
-
-from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from app.exceptions import GitHubAPIError
@@ -37,6 +34,7 @@ async def github_api_error_handler(
     return JSONResponse(
         status_code=exc.status_code,
         content={
-            "detail": exc.message
+            "error": "GitHub API error",
+            "message": exc.message
         }
     )

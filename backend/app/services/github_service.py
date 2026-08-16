@@ -45,13 +45,7 @@ def get_repository_info(repository_url):
 
     # Check cache first
     if repository_url in repository_cache:
-
-        print("Using cached repository:", repository_url)
-
-
         return repository_cache[repository_url]
-
-    print("Fetching repository from GitHub:", repository_url)
 
 
     response = requests.get(
@@ -89,20 +83,9 @@ def get_repository_language(
     )
 
     if repository_url in repository_cache:
-
-        print(
-            "Using cached repository:",
-            repository_url
-        )
-
         return repository_cache[
             repository_url
         ]["language"]
-
-    print(
-        "Fetching repository:",
-        repository_url
-    )
 
     headers = {
         "Authorization": f"Bearer {settings.GITHUB_TOKEN}",
