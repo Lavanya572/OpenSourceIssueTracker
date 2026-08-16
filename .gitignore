@@ -1,2 +1,17 @@
 /Readme.docx
 /~$Readme.docx
+.env
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+venv/
+# Python
+__pycache__/
+*.py[cod]
+
+# IDE
+.vs/
+
+# Python tooling
+.pyright/

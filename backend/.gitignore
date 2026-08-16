@@ -4,3 +4,12 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+# Python
+__pycache__/
+*.py[cod]
+
+# IDE
+.vs/
+
+# Python tooling
+.pyright/
